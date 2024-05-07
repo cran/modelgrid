@@ -7,18 +7,20 @@
 \usage{
 model_grid()
 
-\method{train}{model_grid}(mg, train_all = FALSE, resample_seed = 123)
+\method{train}{model_grid}(x, ..., train_all = FALSE, resample_seed = 123)
 }
 \arguments{
-\item{mg}{\code{model_grid}}
+\item{x}{\code{model_grid}}
+
+\item{...}{other arguments passed to methods
+across models in order to obtain a fair (and reproducible) comparison of
+the models. If set to NULL, seed will not be set (NOT advised).}
 
 \item{train_all}{\code{logical} if set to TRUE, all models will be trained.
 If set to FALSE, only models, for which no fit already exists, will be
 trained.}
 
-\item{resample_seed}{\code{integer} is used to create identical resamples
-across models in order to obtain a fair (and reproducible) comparison of
-the models. If set to NULL, seed will not be set (NOT advised).}
+\item{resample_seed}{\code{integer} is used to create identical resamples}
 }
 \value{
 \code{model_grid}

@@ -4,11 +4,12 @@
 #' all model (and training) configurations from a model grid and
 #' trains them with the train function from the caret package.
 #'
-#' @param mg \code{model_grid}
+#' @param x \code{model_grid}
 #' @param train_all \code{logical} if set to TRUE, all models will be trained.
 #' If set to FALSE, only models, for which no fit already exists, will be
 #' trained.
 #' @param resample_seed \code{integer} is used to create identical resamples
+#' @param ... other arguments passed to methods
 #' across models in order to obtain a fair (and reproducible) comparison of
 #' the models. If set to NULL, seed will not be set (NOT advised).
 #'
@@ -54,15 +55,15 @@
 #' train(mg)
 #' }
 #' @rdname model_grid
-train.model_grid <- function(mg, train_all = FALSE, resample_seed = 123) {
+train.model_grid <- function(x, ..., train_all = FALSE, resample_seed = 123) {
 
   # check inputs.
-  if (length(mg$models) == 0) {
+  if (length(x$models) == 0) {
     stop("No models to train.")
   }
 
   # identify models without corresponding fits.
-  models_without_fit <- dplyr::setdiff(names(mg$models), names(mg$model_fits))
+  models_without_fit <- dplyr::setdiff(names(x$models), names(x$model_fits))
 
   # stop, if all models already have been equipped with a fit.
   if (length(models_without_fit) == 0 & !train_all) {
@@ -72,16 +73,16 @@ train.model_grid <- function(mg, train_all = FALSE, resample_seed = 123) {
 
   # decide what models to train.
   if (length(models_without_fit) != 0 & !train_all) {
-    fit_models <- mg$models[models_without_fit]
+    fit_models <- x$models[models_without_fit]
   } else {
-    fit_models <- mg$models
+    fit_models <- x$models
   }
 
   # consolidate and train models from model grid.
   models_trained <-
     fit_models %>%
     purrr::map2(.x = ., .y = names(.), purrr::safely(.f = function(.x, .y) {
-      complete_model <- consolidate_model(mg$shared_settings, .x)
+      complete_model <- consolidate_model(x$shared_settings, .x)
       message(paste0("[", Sys.time(),"] Training of '", .y, "' started."))
       # set seed before training to ensure the same resamples are used for all models.
       if (!is.null(resample_seed)) {set.seed(resample_seed)}
@@ -110,18 +111,18 @@ train.model_grid <- function(mg, train_all = FALSE, resample_seed = 123) {
   if (all(is_ok)) {models_trained <- purrr::map(models_trained, "result")}
 
   # add trained models to model grid.
-  if(identical(fit_models, mg$models)) {
+  if(identical(fit_models, x$models)) {
     # in case, that all models have been trained, insert all models.
-    mg$model_fits <- models_trained
+    x$model_fits <- models_trained
   } else {
     # if only a subset of the models have been trained, append only these model fits.
-    mg$model_fits <- append(mg$model_fits, models_trained)
+    x$model_fits <- append(x$model_fits, models_trained)
   }
 
   # sort trained models in lexicographical order by their names.
-  mg$model_fits <- mg$model_fits[sort(names(mg$model_fits))]
+  x$model_fits <- x$model_fits[sort(names(x$model_fits))]
 
   # return model grid.
-  mg
+  x
 
 }

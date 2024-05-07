@@ -1,14 +1,14 @@
-## ---- include = FALSE----------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 library(magrittr)
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
-## ---- message = FALSE----------------------------------------------------
+## ----message = FALSE----------------------------------------------------------
 library(modelgrid)
 mg <- model_grid()
 
 mg
 
-## ---- message = FALSE----------------------------------------------------
+## ----message = FALSE----------------------------------------------------------
 library(magrittr)
 library(caret)
 library(dplyr)
@@ -34,7 +34,7 @@ mg <-
 
 purrr::map_chr(mg$shared_settings, class)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 mg <- 
   mg %>%
   add_model(model_name = "Logistic Regression Baseline",
@@ -43,7 +43,7 @@ mg <-
 
 mg$models
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 mg <- 
   mg %>%
   add_model(model_name = "Logistic Regression PCA",
@@ -58,7 +58,7 @@ mg <-
             
 mg$models
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # there are no conflicts.
 dplyr::intersect(names(mg$shared_settings), names(mg$models$`Logistic Regression Baseline`))
 
@@ -69,7 +69,7 @@ consolidate_model(
   ) %>%
   purrr::map_chr(class)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # the 'preProc' setting is defined both in the shared and model specific settings.
 dplyr::intersect(names(mg$shared_settings), names(mg$models$`Logistic Regression PCA`))
 
@@ -83,7 +83,7 @@ consolidate_model(
   ) %>%
   magrittr::extract2("preProc")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # the 'trControl$preProcOptions$thresh' setting is defined in the shared
 # settings but customized in the model specific settings.
 
@@ -97,7 +97,7 @@ consolidate_model(
   ) %>%
   magrittr::extract2(c("trControl", "preProcOptions", "thresh"))
 
-## ---- message = FALSE, warning = FALSE-----------------------------------
+## ----message = FALSE, warning = FALSE-----------------------------------------
 # train models from model grid.
 mg <- train(mg)
 
@@ -109,7 +109,7 @@ mg$model_fits %>%
   caret::resamples(.) %>%
   summary(.)
 
-## ---- warning = FALSE----------------------------------------------------
+## ----warning = FALSE----------------------------------------------------------
 # train models from model grid.
 mg <- 
   mg %>%
@@ -119,14 +119,14 @@ mg <-
 
 names(mg$model_fits)
 
-## ---- message = FALSE----------------------------------------------------
+## ----message = FALSE----------------------------------------------------------
 # create base recipe.
 library(recipes)
 rec <- 
   recipe(GermanCredit, formula = Class ~ .) %>%
   step_nzv(all_predictors())
 
-## ---- warning = FALSE----------------------------------------------------
+## ----warning = FALSE----------------------------------------------------------
 mg_rec <-
   model_grid() %>%
   share_settings(
@@ -160,7 +160,7 @@ mg_rec$model_fits %>%
   caret::resamples(.) %>%
   summary(.)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # existing model configuration.
 mg$models$`Logistic Regression PCA`
 
@@ -172,7 +172,7 @@ mg <-
 
 mg$models$`Logistic Regression PCA`
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 names(mg$models)
 
 # remove model configuration.
